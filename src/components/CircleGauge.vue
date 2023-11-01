@@ -1,22 +1,23 @@
 <template>
   <div class="circle-gauge">
-    <svg :width="size" :height="size" xmlns="http://www.w3.org/2000/svg">
-      <!-- Create the circle background -->
+    <svg :width="size" :height="size" viewBox="0 0 100 100">
       <circle
-        :cx="size / 2"
-        :cy="size / 2"
-        :r="size / 2 - strokeWidth / 2"
-        :stroke="backgroundColor"
-        :stroke-width="strokeWidth"
-        fill="none"
+        cx="50"
+        cy="50"
+        :r="radius"
+        fill="transparent"
+        stroke="#ccc"
+        stroke-width="10"
       />
-
-      <!-- Create the intervals -->
-      <path
-        v-for="(interval, index) in intervals"
-        :key="index"
-        :d="getIntervalPath(interval, index)"
-        :fill="interval.color"
+      <circle
+        cx="50"
+        cy="50"
+        :r="radius"
+        fill="transparent"
+        :stroke="getGaugeColor(100)"
+        stroke-width="10"
+        :stroke-dasharray="dashArray"
+        :stroke-dashoffset="dashOffset"
       />
     </svg>
   </div>
@@ -32,43 +33,39 @@ interface IntervalItem {
 
 export default defineComponent({
   props: {
-    size: {
-      type: Number,
-      required: true,
-    },
-    strokeWidth: {
-      type: Number,
-      default: 10,
-    },
-    backgroundColor: {
-      type: String,
-      default: "lightgray",
-    },
     intervals: {
       type: Array as PropType<IntervalItem[]>,
       required: true,
     },
+    size: {
+      type: Number,
+      default: 200,
+    },
+    value: {
+      type: Number,
+      required: true,
+    },
+  },
+  computed: {
+    radius(): number {
+      return (this.size - 10) / 2;
+    },
+    dashArray(): number {
+      return 2 * Math.PI * this.radius;
+    },
+    dashOffset(): number {
+      const percentage = (this.value / 100) * this.dashArray;
+      return this.dashArray - percentage;
+    },
   },
   methods: {
-    getIntervalPath(interval: IntervalItem, index: number): string {
-      const radius = this.size / 2 - this.strokeWidth / 2;
-      const startAngle =
-        index === 0
-          ? -Math.PI / 2
-          : (this.intervals[index - 1].value * Math.PI) / 50 - Math.PI / 2;
-      const endAngle = (interval.value * Math.PI) / 50 - Math.PI / 2;
-
-      const x1 = this.size / 2 + radius * Math.cos(startAngle);
-      const y1 = this.size / 2 + radius * Math.sin(startAngle);
-
-      const x2 = this.size / 2 + radius * Math.cos(endAngle);
-      const y2 = this.size / 2 + radius * Math.sin(endAngle);
-
-      const largeArcFlag = endAngle - startAngle <= Math.PI ? 0 : 1;
-
-      return `M ${this.size / 2},${
-        this.size / 2
-      } L ${x1},${y1} A ${radius},${radius} 0 ${largeArcFlag},1 ${x2},${y2} Z`;
+    getGaugeColor(val: number): string {
+      for (const interval of this.intervals) {
+        if (val <= interval.value) {
+          return interval.color;
+        }
+      }
+      return this.intervals[this.intervals.length - 1].color;
     },
   },
 });

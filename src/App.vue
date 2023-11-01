@@ -1,26 +1,25 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <circle-gauge :intervals="intervals" :size="200" :value="75" />
+  </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script lang="ts">
+import { defineComponent } from "vue";
+import CircleGauge from "@/components/CircleGauge.vue";
 
-export default {
-  name: 'App',
+export default defineComponent({
   components: {
-    HelloWorld
-  }
-}
+    CircleGauge,
+  },
+  data() {
+    return {
+      intervals: [
+        { value: 0, color: "#E1CA46" },
+        { value: 50, color: "#75C952" },
+        { value: 100, color: "#469ED5" },
+      ],
+    };
+  },
+});
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
